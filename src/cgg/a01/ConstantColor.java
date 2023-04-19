@@ -15,4 +15,4 @@ public class ConstantColor {
   public Color getColor(double x, double y) {
     return color;
   }
-}
+} 

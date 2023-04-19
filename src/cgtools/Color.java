@@ -10,4 +10,16 @@ public record Color(double r, double g, double b) {
   public String toString() {
     return String.format("(Col: %.2f %.2f %.2f)", r, g, b);
   }
+
+public double getBlue() {
+    return 0;
+}
+
+public double getRed() {
+    return 0;
+}
+
+public double getGreen() {
+    return 0;
+}
 }
