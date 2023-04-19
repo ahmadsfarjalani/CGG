@@ -25,9 +25,9 @@ public class Image {
    */
   public void setPixel(int x, int y, Color color) {
     final int imageIndex = (y * width + x) * 3;
-    data [imageIndex + 0] = color.getRed();
-    data [imageIndex + 1] = color.getGreen();
-    data [imageIndex + 2] = color.getBlue();
+    data [imageIndex + 0] = color.r();
+    data [imageIndex + 1] = color.g();
+    data [imageIndex + 2] = color.b();
   }
 
   /**
