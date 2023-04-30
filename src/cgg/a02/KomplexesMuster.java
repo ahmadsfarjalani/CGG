@@ -1,8 +1,6 @@
-package cgg.a01;
+package cgg.a02;
 
 import cgtools.Color;
-import java.util.Random;
-
 public class KomplexesMuster {
 
     private double groesse;
