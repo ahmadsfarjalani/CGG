@@ -1,4 +1,4 @@
-package cgg.a02;
+package cgg.a01;
 
 import cgtools.Color;
 public class KomplexesMuster {

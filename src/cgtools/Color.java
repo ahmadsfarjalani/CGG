@@ -6,7 +6,9 @@ package cgtools;
 // for details on the record data type.
 public record Color(double r, double g, double b) {
 
-  @Override
+  public static Color white;
+
+@Override
   public String toString() {
     return String.format("(Col: %.2f %.2f %.2f)", r, g, b);
   }
@@ -21,5 +23,13 @@ public double getRed() {
 
 public double getGreen() {
     return 0;
+}
+
+public int getRGB() {
+    return 0;
+}
+
+public static Color color(double d, int i, int j) {
+  return null;
 }
 }

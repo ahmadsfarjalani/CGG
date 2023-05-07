@@ -1,4 +1,5 @@
-package cgg.a02;
+/** @author henrik.tramberend@beuth-hochschule.de */
+package cgg.a01;
 
 import cgtools.*;
 
@@ -14,4 +15,4 @@ public class ConstantColor {
   public Color getColor(double x, double y) {
     return color;
   }
-}
+} 

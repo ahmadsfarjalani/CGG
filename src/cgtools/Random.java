@@ -32,7 +32,7 @@ public static Object random;
     generator = new Random(s);
   }
 
-  private Random() {
+  public Random() {
     this(System.nanoTime());
   }
 

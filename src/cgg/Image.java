@@ -1,8 +1,15 @@
 package cgg;
-import cgg.a02.Disc;
+
+import java.util.ArrayList;
+
+import cgg.a03.CameraObscura;
+import cgg.a03.Hit;
+import cgg.a03.Ray;
+import cgg.a03.RayTracing;
+import cgg.a03.Sphere;
 import cgtools.Color;
 import cgtools.ImageWriter;
-import cgtools.Random;
+import cgtools.Point;
 
 public class Image {
 
@@ -19,7 +26,7 @@ public class Image {
   public void setPixel(int x, int y, Color color) {
     //zu weisung der pixel 
     int i = 3 * (y * width + x);
-    double gamma = 2.2;
+    double gamma = 0.5;
     array[i + 0] = Math.pow(color.r(), 1/gamma);
     array[i + 1] = Math.pow(color.g(), 1/gamma);
     array[i + 2] = Math.pow(color.b(), 1/gamma);
@@ -28,19 +35,47 @@ public class Image {
   public void write(String filename) {
     ImageWriter.write(filename,array,width,height);
   }
+  public void sample(int sampleRate, ArrayList<Sphere> spheres, CameraObscura camera) {
+    Color bottomColor = new Color(0.2f, 0.3f, 0.4f); // Ändern Sie die Werte für die untere Farbe des Farbverlaufs
+    Color topColor = new Color(0.4f, 0.3f, 0.2f); // Ändern Sie die Werte für die obere Farbe des Farbverlaufs
 
-  public void sample(Disc disc, int runden) {
-    for (int x = 0; x < this.width; x++) {
-        for (int y = 0; y < this.height; y++) {
-            Color sampleColor = new Color(1, 2, 3);
-            for (int i = 0; i < runden; i++) {
-                Color pixelColor = disc.coloredDiscs(x + Random.random(), y + Random.random());
-                sampleColor = new Color(sampleColor.r() + pixelColor.r(), sampleColor.g() + pixelColor.g(), sampleColor.b() + pixelColor.b());
+    for (int xPosition = 0; xPosition < width; xPosition++) {
+        for (int yPosition = 0; yPosition < height; yPosition++) {
+            Color accumulatedColor = new Color(0, 0, 0);
+            for (int sampleIndex = 0; sampleIndex < sampleRate; sampleIndex++) {
+                Ray ray = camera.generateRay(xPosition, yPosition);
+                
+                Hit nearestHit = null;
+                for (Sphere sphere : spheres) {
+                    Hit hit = sphere.intersect(ray);
+                    if (hit != null) {
+                        if ((nearestHit == null) || (hit.getRayParameterT() < nearestHit.getRayParameterT())) {
+                            nearestHit = hit;
+                        }
+                    }
+                }
+
+                Color currentPixelColor;
+                if (nearestHit != null) {
+                    currentPixelColor = RayTracing.shade(nearestHit.getNormVec(), nearestHit.getHitPointColor());
+                } else {
+                    // Interpolate between the bottom and top colors based on the current y position
+                    float t = (float) yPosition / (float) height;
+                    currentPixelColor = new Color(
+                        bottomColor.r() * (1 - t) + topColor.r() * t,
+                        bottomColor.g() * (1 - t) + topColor.g() * t,
+                        bottomColor.b() * (1 - t) + topColor.b() * t
+                    );
+                }
+                accumulatedColor = new Color(accumulatedColor.r() + currentPixelColor.r(), accumulatedColor.g() + currentPixelColor.g(), accumulatedColor.b() + currentPixelColor.b());
             }
-            sampleColor = new Color(sampleColor.r() / runden, sampleColor.g() / runden, sampleColor.b() / runden);
-            setPixel(x, y, sampleColor);
+            Color finalColor = new Color(accumulatedColor.r() / sampleRate, accumulatedColor.g() / sampleRate, accumulatedColor.b() / sampleRate);
+            setPixel(xPosition, yPosition, finalColor);
         }
     }
+}
 
+  public void addTriangle(Point point, Point point2, Point point3, Color triangleColor) {
   }
+  
 }

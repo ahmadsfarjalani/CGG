@@ -22,4 +22,8 @@ public record Point(double x, double y, double z) {
     Point v = (Point) o;
     return Util.isZero(length(subtract(this, v)));
   }
+
+public Point add(Object scale) {
+    return null;
+}
 }
