@@ -32,4 +32,12 @@ public int getRGB() {
 public static Color color(double d, int i, int j) {
   return null;
 }
+
+public Color add(Color currentPixelColor) {
+    return null;
+}
+
+public Color divide(Object sampleRate) {
+    return null;
+}
 }
