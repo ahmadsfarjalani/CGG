@@ -26,7 +26,7 @@ public class Main {
         for (int j = 0; j < 3; j++) {
             for (int i = 0; i < 6; i++) {
                 double x = random.nextDouble() * 5 - 2.5;
-                double y = -0.5 + random.nextDouble() * 2; // Zufällige y-Position, von "im Boden" bis "darüber"
+                double y = -0.5 + random.nextDouble() * 2; // Zufällige y-Position, von "im Boden" bis "darüber" // test ettewttewtt
                 double z = random.nextDouble() * -4 - 1;
                 double radius = maxRadius - i * radiusIncrement;
 
