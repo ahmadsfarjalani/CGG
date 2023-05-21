@@ -45,7 +45,7 @@ public class Main {
         Raytracer raytracer = new Raytracer(camera, group, 100);
 
         Image shapes = new Image(width, height);
-        shapes.sample(500, group, camera, raytracer, 500);
+        shapes.sample(100, group, camera, raytracer, 250);
 
         final String filename = "doc/a05-diffuse-spheres.png"; 
         shapes.write(filename);
