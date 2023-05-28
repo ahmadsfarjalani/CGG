@@ -9,6 +9,8 @@ import cgg.a04.*;
 import cgg.a05.BackgroundMaterial;
 import cgg.a05.DiffuseMaterial;
 import cgg.a05.Material;
+import cgg.a06.ReflectiveMaterial;
+import cgg.a06.TransparentMaterial;
 import cgtools.Color;
 import cgtools.Matrix;
 import cgtools.Point;
@@ -23,9 +25,10 @@ public class Main {
 
     private static final List<Shape> shapes = new ArrayList<>();
 
-    private static final Shape background = new Background(background(0.6, 0.8, 1));
+    private static final Shape background = new Background(background(1, 1, 1));
     private static final Shape ground = new Plane(point(0.0, -0.5, 0.0), direction(0, 1, 0),
-            Double.POSITIVE_INFINITY, new ReflectiveMaterial(new Color(1, 0.1, 0.1), 0));
+        Double.POSITIVE_INFINITY, new ReflectiveMaterial(new Color(0.5, 0.7, 0.9), 0));
+
 
     public static void main(String[] args) {
         Matrix identity = Matrix.identity();
@@ -37,20 +40,21 @@ public class Main {
         shapes.add(background);
         int z = 40;
         for (int i = 0; i < 50; i++) {
+
             shapes.add(new Cylinder(point(5, -0.475, z), 0.5, 2, background(1, 0.1, 1)));
             shapes.add(new Cylinder(point(-5, -0.475, z), 0.5, 2, background(1, 0.1, 1)));
             shapes.add(new Cylinder(point(5, -0.5, z), 0.55, 2.05, transparent(0.3, 0.3, 0.3)));
             shapes.add(new Cylinder(point(-5, -0.5, z), 0.55, 2.05, transparent(0.3, 0.3, 0.3)));
+
             z -= 10;
         }
-
+    
         Group scene = new Group(shapes);
-        //createImage(identity, scene, "a07-1.png");
-        createImage(transformation, scene, "a07-2.png");
+        createImage(transformation, scene, "doc/a06-camera.png");
     }
 
     public static void createImage(Matrix matrix, Group scene, String filename) {
-        Camera camera = new Camera(Math.PI / 3, 1280, 720, matrix);
+        Camera camera = new Camera(Math.PI / 4, 1380, 740, matrix);
         createImage(camera, scene, filename);
     }
 
@@ -60,7 +64,7 @@ public class Main {
         Image image = new Image();
         Raytracer raytracer = new Raytracer(scene, camera, image);
         raytracer.raytrace();
-        image.write(Image.getFilepath(filename));
+        //image.write(Image.getFilepath(filename));
         long end = System.nanoTime();
         System.out.println("Completed in " + Math.round((end - start) / 1.0e9) + " seconds.");
     }
