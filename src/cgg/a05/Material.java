@@ -1,11 +1,13 @@
 package cgg.a05;
 
-import cgtools.*;
+import cgg.a03.Hit;
+import cgg.a03.Ray;
 
 public interface Material {
-    public Ray scatteredRay(Ray ray, Hit hit);
 
-    public Color albedo();
+    int width();
 
-    public Color emission();
+    int height();
+
+    Properties properties(Ray incomingRay, Hit hit);
 }

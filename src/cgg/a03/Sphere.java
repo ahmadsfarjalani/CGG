@@ -1,45 +1,52 @@
 package cgg.a03;
 
-import cgtools.*;
+import cgg.a04.Shape;
+import cgg.a05.Material;
+import cgtools.Direction;
+import cgtools.Point;
 
-public class Sphere {
-    private Point center;
-    private double radius;
-    private Color color;
+import static cgtools.Vector.*;
+import static cgtools.Vector.subtract;
 
-    public Sphere(Point center, double radius, Color color) {
-        this.center = center;
-        this.radius = radius;
-        this.color = color;
-    }
+public record Sphere(Point center, double radius, Material material) implements Shape {
 
+    /**
+     * Checks if a given ray intersects the sphere. If it does, returns a hit object with the intersection.
+     * Only accepts a hit if the ray parameter t is within bounds.
+     *
+     * @param r the ray to be checked.
+     * @return null if the ray doesn't intersect the sphere; a hit object with the first intersection if it does.
+     */
     public Hit intersect(Ray r) {
-        Direction x0 = Vector.subtract(r.getOrigin(), center);
+        // Generate a second ray which is offset by the location of the sphere. This is needed for a correct calculation.
+        Point source = subtract(r.source, direction(center.x(), center.y(), center.z()));
+        Ray r2 = new Ray(source, r.direction, r.tmin, r.tmax);
+        // Calculate coefficients a, b and c
+        double a = dotProduct(r2.direction, r2.direction);
+        double b = 2 * dotProduct(r2.source, r2.direction);
+        double c = dotProduct(r2.source, r2.source) - radius * radius;
+        double discriminant = b * b - 4 * a * c;
 
-        double a = Vector.dotProduct(r.getDirection(), r.getDirection());
-        double b = 2 * Vector.dotProduct(x0, r.getDirection());
-        double c = Vector.dotProduct(x0, x0) - (radius * radius);
-
-        double n = b * b - 4 * a * c;
-
-        if(n >= 0) {
-            double t = 0;
-            double t1 = (-b + Math.sqrt((b * b) - (4 * a * c))) / (2 * a);
-            double t2 = (-b - Math.sqrt((b * b) - (4 * a * c))) / (2 * a);
-
-            if(t1 < t2) {
-                t = t1;
-            }
-            else {
-                t = t2;
-            }
-
-            if(r.isValid(t)) {
-                Direction normal = Vector.normalize(Vector.divide(Vector.subtract(r.pointAt(t2), center), radius));
-                Hit hitPoint = new Hit(t2, r.pointAt(t2), normal, color);
-                return hitPoint;
-            }
+        if (discriminant < 0) {
+            return null;
         }
-        return null;
+        // Calculate ray parameter t for the first intersection and check if it is within bounds.
+        double t0 = (-b - Math.sqrt(discriminant)) / 2 * a;
+        double t1 = (-b + Math.sqrt(discriminant)) / 2 * a;
+
+        double t;
+        if (r.isValid(t0)) {
+            t = t0;
+        } else if (r.isValid(t1)) {
+            t = t1;
+        } else return null;
+        // Generate a hit object
+        Point hit = add(r.source, multiply(t, r.direction));
+        Direction normal = divide(subtract(hit, center), radius);
+        double inclination = Math.acos(normal.y());
+        double azimuth = Math.PI + Math.atan2(normal.x(), normal.z());
+        double u = azimuth / (2 * Math.PI);
+        double v = inclination / Math.PI;
+        return new Hit(t, hit, normal, material, u, v);
     }
 }

@@ -1,18 +1,26 @@
 package cgg.a04;
 
-import cgtools.*;
+import cgg.a03.Hit;
+import cgg.a03.Ray;
+import cgg.a05.Material;
+import cgtools.Direction;
+import cgtools.Point;
 
-public class Background implements Shape {
-    private Color color;
+import static cgtools.Vector.*;
 
-    public Background(Color color) {
-        this.color = color;
-    }
+public record Background(Material material) implements Shape {
 
-    public Hit intersect(Ray r) {
-        // Direction normal = Vector.normalize(r.getDirection());
-        // Hit hitPoint = new Hit(Double.POSITIVE_INFINITY, r.pointAt(Double.POSITIVE_INFINITY), normal, color);
-        Hit hitPoint = new Hit(r.getTmax(), r.pointAt(r.getTmax()), new Direction(1, 0, 0), color);
-        return hitPoint;
+    @Override
+    public Hit intersect(Ray ray) {
+        if (ray.tmax != Double.POSITIVE_INFINITY) {
+            return null;
+        }
+        Point hit = add(ray.source, multiply(ray.tmax, ray.direction));
+        Direction normal = ray.direction;
+        double inclination = Math.acos(normal.y());
+        double azimuth = Math.PI + Math.atan2(normal.x(), normal.z());
+        double u = azimuth / (2 * Math.PI);
+        double v = inclination / Math.PI;
+        return new Hit(ray.tmax, hit, negate(ray.direction), material, u, v);
     }
 }

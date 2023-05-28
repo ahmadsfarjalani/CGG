@@ -1,40 +1,55 @@
 package cgg.a04;
 
-import java.util.List;
+import cgg.Image;
+import cgg.a03.Camera;
+import cgg.a03.Hit;
+import cgg.a03.Ray;
+import cgg.a05.Properties;
+import cgtools.Color;
+import cgtools.Sampler;
 
-import cgtools.*;
+import static cgtools.Color.add;
+import static cgtools.Color.multiply;
+import static cgtools.Util.shade;
 
-public class Raytracer implements Sampler {
-    public CameraObscura camera;
-    Group group;
-    public Object sampleRate;
+public record Raytracer(Group scene, Camera cam, Image image) implements Sampler {
 
-    public Raytracer(CameraObscura camera, Group group) {
-        this.camera = camera;
-        this.group = group;
+    public void raytrace() {
+        image.sample(this);
     }
 
-    public Raytracer(CameraObscura camera2, List<Sphere> spheres) {
+    @Override
+    public int width() {
+        return 0;
     }
 
+    @Override
+    public int height() {
+        return 0;
+    }
+
+    @Override
     public Color getColor(double x, double y) {
-        Ray r = camera.generateRay(x, y);
-        Hit closestHit = group.intersect(r);
+        Ray ray = cam.generateRay(x, y);
+        return calculateRadiance(scene, ray, 5);
+    }
 
-        if(closestHit != null) {
-            return shade(closestHit.getNormVec(), closestHit.getHitPointColor());
+    public Color calculateRadiance(Shape scene, Ray ray, int depth) {
+        // Check for maximum recursion depth
+        if (depth == 0) {
+            return new Color(0, 0, 0);
         }
-        return Vector.black;
-    }
-
-    public static Color shade(Direction normal, Color color) {
-        Direction lightingDirection = Vector.normalize(Vector.direction(1.0, 1.0, 0.5));
-        Color ambient = Vector.multiply(0.1, color);
-        Color diffuse = Vector.multiply(0.9 * Math.max(0, Vector.dotProduct(lightingDirection, normal)), color);
-        return Vector.add(ambient, diffuse);
-    }
-
-    public Hit trace(Ray ray) {
-        return null;
+        // Intersect ray with scene
+        Hit hit = scene.intersect(ray);
+        // Query material at hit point
+        Properties properties = hit.material().properties(ray, hit);
+        if (properties.scatteredRay() == null) {
+            // Absorbed, just emission
+            return properties.emission();
+        } else {
+            // Combine emission and reflection
+            return add(properties.emission(), multiply(properties.albedo(),
+                    calculateRadiance(scene, properties.scatteredRay(), depth - 1)));
+        }
     }
 }

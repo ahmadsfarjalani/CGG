@@ -1,6 +1,10 @@
 package cgg.a04;
 
-public interface Shape {
-    public Hit intersect(Ray r);
-}
+import cgg.a03.Hit;
+import cgg.a03.Ray;
 
+public interface Shape {
+
+    Hit intersect(Ray ray);
+
+}

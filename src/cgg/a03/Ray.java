@@ -1,45 +1,42 @@
 package cgg.a03;
-import cgtools.*;
+
+import cgtools.Direction;
+import cgtools.Matrix;
+import cgtools.Point;
+
+import static cgtools.Vector.*;
 
 public class Ray {
-    
-    private Point origin;
-    private Direction dir;
-    private double tMin;
-    private double tMax;
 
-    public Ray(Point origin, Direction dir, double tMin, double tMax) {
-        this.origin = origin;
-        this.dir = Vector.normalize(dir);
-        this.tMin = tMin;
-        this.tMax = tMax;
+    public final Point source;
+    public final Direction direction;
+    public final double tmin;
+    public final double tmax;
+
+    public Ray(Point source, Direction direction, double tmin, double tmax) {
+        this.source = source;
+        this.direction = direction;
+        this.tmin = tmin;
+        this.tmax = tmax;
+    }
+
+    public Ray transform(Matrix m) {
+        Point source = Matrix.multiply(m, this.source);
+        Direction direction = Matrix.multiply(m, this.direction);
+        return new Ray(source, direction, this.tmin, this.tmax);
+    }
+
+    public Ray transform(Matrix sourceMatrix, Matrix directionMatrix) {
+        Point source = Matrix.multiply(sourceMatrix, this.source);
+        Direction direction = Matrix.multiply(directionMatrix, this.direction);
+        return new Ray(source, direction, this.tmin, this.tmax);
     }
 
     public Point pointAt(double t) {
-        Direction dirT = Vector.multiply(t, dir);
-        Point point = Vector.add(dirT, origin);
-        return point;
+        return add(source, multiply(direction, t));
     }
 
     public boolean isValid(double t) {
-        if(t>=tMin && t<=tMax) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
-    public Direction getDirection() {
-        return dir;
-    }
-
-    public Point getOrigin() {
-        return origin;
-    }
-
-    public String toString() {
-        String returnString = "" + Ray.class;
-        return returnString;
+        return t >= tmin && t <= tmax;
     }
 }

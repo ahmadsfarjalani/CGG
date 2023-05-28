@@ -1,30 +1,55 @@
 package cgg.a04;
 
+import cgg.a03.Hit;
+import cgg.a03.Ray;
+import cgg.a07.Transformation;
+import cgtools.Matrix;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Group implements Shape {
-    private ArrayList<Shape> shapes;
 
-    public Group() {
-        shapes = new ArrayList<Shape>();
+    private final List<Shape> shapes = new ArrayList<>();
+    private final Transformation transformation;
+
+    public Group(Transformation transformation, Shape... shapes) {
+        this.transformation = transformation;
+        this.shapes.addAll(Arrays.asList(shapes));
     }
 
-    public Hit intersect(Ray r) {
-        Hit closesHit = null;
+    public Group(Shape... shapes) {
+        this.transformation = new Transformation(Matrix.identity());
+        this.shapes.addAll(Arrays.asList(shapes));
+    }
 
-        for(Shape shape : shapes) {
-            Hit shapeHit = shape.intersect(r);
+    public Group(Transformation transformation, List<Shape> shapes) {
+        this.transformation = transformation;
+        this.shapes.addAll(shapes);
+    }
 
-            if(shapeHit != null) {
-                if(closesHit == null || shapeHit.getRayParameterT() <= closesHit.getRayParameterT()) {
-                    closesHit = shapeHit;
+    public Group(List<Shape> shapes) {
+        this.transformation = new Transformation(Matrix.identity());
+        this.shapes.addAll(shapes);
+    }
+
+    @Override
+    public Hit intersect(Ray ray) {
+        Ray r2 = transformation.transform(ray);
+        Hit hit = null;
+        for (Shape s: shapes) {
+            Hit h = s.intersect(r2);
+            if (h != null) {
+                if (hit == null) {
+                    hit = h;
+                } else {
+                    if (h.t() < hit.t()) {
+                        hit = h;
+                    }
                 }
             }
-        } 
-        return closesHit;
-    }
-
-    public void addShape(Shape shape) {
-        shapes.add(shape);
+        }
+        return transformation.transform(hit);
     }
 }

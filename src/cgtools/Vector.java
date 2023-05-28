@@ -11,10 +11,6 @@ public final class Vector {
     return new Point(x, y, z);
   }
 
-  public static Point point(Direction d) {
-    return new Point(d.x(), d.y(), d.z());
-  }
-
   public static Color color(double r, double g, double b) {
     return new Color(r, g, b);
   }
@@ -76,12 +72,8 @@ public final class Vector {
     return direction(s * a.x(), s * a.y(), s * a.z());
   }
 
-  public static Point multiply(double s, Point a) {
-    return point(s * a.x(), s * a.y(), s * a.z());
-  }
-
-  public static Point multiply(Point a, Point b) {
-    return point(b.x() * a.x(), b.y() * a.y(), b.z() * a.z());
+  public static Direction multiply(double s, Point a) {
+    return direction(s * a.x(), s * a.y(), s * a.z());
   }
 
   public static Direction multiply(Direction a, double s) {
@@ -92,16 +84,12 @@ public final class Vector {
     return direction(-a.x(), -a.y(), -a.z());
   }
 
-  // public static Vector divide(Vector a, double s) {
-  // return vector(a.x() / s, a.y() / s, a.z() / s, a.w() / s);
-  // }
-
   public static Direction divide(Direction a, double s) {
     return direction(a.x() / s, a.y() / s, a.z() / s);
   }
 
-  public static Point divide(Point a, double s) {
-    return point(a.x() / s, a.y() / s, a.z() / s);
+  public static Direction divide(Point a, double s) {
+    return direction(a.x() / s, a.y() / s, a.z() / s);
   }
 
   public static double dotProduct(Direction a, Direction b) {
@@ -135,18 +123,6 @@ public final class Vector {
 
   public static Direction normalize(Direction a) {
     return divide(a, length(a));
-  }
-
-  public static Point mod(Point a, Point b) {
-    return point(a.x() % b.x(), a.y() % b.y(), a.z() % b.z());
-  }
-
-  public static Point min(Point a, Point b) {
-    return new Point(Math.min(a.x(), b.x()), Math.min(a.y(), b.y()), Math.min(a.z(), b.z()));
-  }
-
-  public static Point max(Point a, Point b) {
-    return new Point(Math.max(a.x(), b.x()), Math.max(a.y(), b.y()), Math.max(a.z(), b.z()));
   }
 
   public static Color asColor(Direction a) {
@@ -207,6 +183,9 @@ public final class Vector {
     return multiply(hsv.b(), add(multiply(hsv.g(), subtract(hue(hsv.r()), white)), white));
   }
 
+  private Vector() {
+  }
+
   public static final Point zero = point(0, 0, 0);
   public static final Direction xAxis = direction(1, 0, 0);
   public static final Direction yAxis = direction(0, 1, 0);
@@ -221,11 +200,4 @@ public final class Vector {
   public static final Color red = color(1, 0, 0);
   public static final Color green = color(0, 1, 0);
   public static final Color blue = color(0, 0, 1);
-public Vector normalize() {
-    return null;
-}
-
-public Object scale(double t) {
-    return null;
-}
 }

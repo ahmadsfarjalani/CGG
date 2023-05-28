@@ -13,7 +13,6 @@ public class Random extends java.util.Random {
   private long x;
 
   private static Random generator;
-public static Object random;
 
   static {
     generator = new Random();
@@ -28,15 +27,11 @@ public static Object random;
     return generator.nextDouble();
   }
 
-  public static void seed(int s) {
-    generator = new Random(s);
-  }
-
   public Random() {
     this(System.nanoTime());
   }
 
-  private Random(final long seed) {
+  public Random(final long seed) {
     x = seed;
   }
 

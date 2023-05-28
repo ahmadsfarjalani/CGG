@@ -41,13 +41,22 @@ public class ImageTexture implements Sampler {
     }
   }
 
+  @Override
+  public int width() {
+    return width;
+  }
+
+  @Override
+  public int height() {
+    return height;
+  }
+
   public Color getColor(double u, double v) {
     if (u < 0 || u > 1 || v < 0 || v > 1)
-    return black;
+      return black;
 
     int x = (int) ((u - Math.floor(u)) * width);
     int y = (int) ((v - Math.floor(v)) * height);
-
     double[] pixelBuffer = new double[components];
     image.getRaster().getPixel(x, y, pixelBuffer);
     Color color = red;
@@ -66,5 +75,10 @@ public class ImageTexture implements Sampler {
         break;
     }
     return divide(color, componentScale);
+  }
+
+  public static String getFilepath(String filename) {
+    String projectDir = System.getProperty("user.dir");
+    return projectDir + "/img/" + filename;
   }
 }

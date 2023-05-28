@@ -1,6 +1,9 @@
 /** @author henrik.tramberend@beuth-hochschule.de */
 package cgtools;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import static cgtools.Vector.*;
 import static java.lang.Math.*;
 
@@ -17,8 +20,7 @@ public final class Util {
   }
 
   public static final Color shade(Direction normal, Color color) {
-    if (normal == null)
-      return color;
+    if (normal == null) return color;
 
     Direction lightDir = normalize(direction(1, 1, 0.5));
     Color ambient = multiply(0.1, color);
@@ -26,14 +28,11 @@ public final class Util {
     return add(ambient, diffuse);
   }
 
-  private static long startTime;
+  public static double round(double value, int places) {
+    if (places < 0) throw new IllegalArgumentException();
 
-  public static void start() {
-    startTime = System.currentTimeMillis();
-  }
-
-  public static double finish() {
-    long stopTime = System.currentTimeMillis();
-    return (stopTime - startTime) / 1000.0;
+    BigDecimal bd = BigDecimal.valueOf(value);
+    bd = bd.setScale(places, RoundingMode.HALF_UP);
+    return bd.doubleValue();
   }
 }

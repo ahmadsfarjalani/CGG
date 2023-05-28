@@ -1,33 +1,35 @@
 package cgg.a03;
-import cgtools.*;
 
-public class Hit {
-    private double t;
-    private Point hitPoint;
-    private Direction normVec;
-    private Color hitPointColor;
+import cgg.a05.Material;
+import cgtools.Direction;
+import cgtools.Matrix;
+import cgtools.Point;
 
-    public Hit(double t, Point hitPoint, Direction normVec, Color hitPointColor) {
-        this.t = t;
-        this.hitPoint = hitPoint;
-        this.normVec = normVec;
-        this.hitPointColor = hitPointColor;
+public record Hit(double t, Point position, Direction normal, Material material, double u, double v) {
+
+    public static Hit min(Hit... hits) {
+        Hit min = null;
+        for (Hit h: hits) {
+            if (h != null) {
+                if (min == null) {
+                    min = h;
+                } else if (h.t < min.t) {
+                    min = h;
+                }
+            }
+        }
+        return min;
     }
 
-    public double getRayParameterT() {
-        return t;
+    public Hit transform(Matrix m) {
+        Point position = Matrix.multiply(m, this.position);
+        Direction normal = Matrix.multiply(m, this.normal);
+        return new Hit(this.t, position, normal, this.material, this.u, this.v);
     }
 
-    public Direction getNormVec() {
-        return normVec;
-    }
-
-    public Color getHitPointColor() {
-        return hitPointColor;
-    }
-
-    public String toString() {
-        String returnString = "" + hitPoint;
-        return returnString;
+    public Hit transform(Matrix positionMatrix, Matrix normalMatrix) {
+        Point position = Matrix.multiply(positionMatrix, this.position);
+        Direction normal = Matrix.multiply(normalMatrix, this.normal);
+        return new Hit(this.t, position, normal, this.material, this.u, this.v);
     }
 }
