@@ -9,8 +9,8 @@ import cgg.a04.*;
 import cgg.a05.BackgroundMaterial;
 import cgg.a05.DiffuseMaterial;
 import cgg.a05.Material;
-import cgg.a06.ReflectiveMaterial;
 import cgg.a06.Cylinder;
+import cgg.a06.ReflectiveMaterial;
 import cgg.a06.TransparentMaterial;
 import cgtools.Color;
 import cgtools.Matrix;
@@ -24,76 +24,78 @@ import static cgtools.Vector.point;
 
 public class Main {
 
-    Matrix identity = Matrix.identity();
-    Matrix translation = Matrix.translation(0, 10, 50);
-    Matrix rotation = Matrix.rotation(1, 0, 0, -10);
-    Matrix transformation = Matrix.multiply(translation, rotation);
+    private static final List<Shape> shapes = new ArrayList<>();
 
-    private static final Camera camera = new Camera(Math.PI / 3, 1280, 720);
-
-    private static Shape background = new Background(new BackgroundMaterial(new Color(1, 1, 1)));
-    private static Shape ground = new Plane(point(0.0, -0.5, 0.0), direction(0, 1, 0),
-            Double.POSITIVE_INFINITY, new DiffuseMaterial(new Color(0.7, 0.7, 0.7)));
+    private static final Shape background = new Background(background(1, 0.3, 0.3));
+    private static final Shape ground = new Plane(point(0.0, -0.5, 0.0), direction(0, 1, 0),
+            Double.POSITIVE_INFINITY, new ReflectiveMaterial(new Color(0.1, 0.1, 0.1), 0));
 
     public static void main(String[] args) {
-        createImage1();
-    }
-
-    private static void createImage1() {
-        List<Shape> shapes = new ArrayList<>();
+        Matrix identity = Matrix.identity();
+        Matrix translation = Matrix.translation(0, 10, 50);
+        Matrix rotation = Matrix.rotation(1, 0, 0, -10);
+        Matrix transformation = Matrix.multiply(translation, rotation);
 
         shapes.add(ground);
         shapes.add(background);
-        shapes.add(sphere(640, 650, 0.3, transparent(0.9, 0.9, 0.9)));
-        shapes.add(cylinder(640, 650, 0.15, 0.3, transparent(0.9, 0.9, 0.9)));
-        shapes.add(sphere(470, 500, 0.5, diffuse(0.4, 1, 0.4)));
-        shapes.add(cylinder(470, 500, 0.25, 0.5, diffuse(0.4, 1, 0.4)));
-        shapes.add(sphere(810, 500, 0.5, reflective(0.25)));
-        shapes.add(cylinder(810, 500, 0.25, 0.5, reflective(0.25)));
-        shapes.add(sphere(300, 550, 0.3, reflective(0)));
-        shapes.add(cylinder(300, 550, 0.15, 0.3, reflective(0)));
-        shapes.add(sphere(980, 550, 0.3, diffuse(0.3, 0.65, 1)));
-        shapes.add(cylinder(980, 550, 0.15, 0.3, diffuse(0.3, 0.65, 1)));
-        shapes.add(sphere(130, 600, 0.2, diffuse(1, 0.15, 0.15)));
-        shapes.add(cylinder(130, 600, 0.1, 0.2, diffuse(1, 0.15, 0.15)));
-        shapes.add(sphere(1150, 600, 0.2, transparent(1, 0.9, 0.6)));
-        shapes.add(cylinder(1150, 600, 0.1, 0.2, transparent(1, 0.9, 0.6)));
-        
+        int z = 40;
+        for (int i = 0; i < 50; i++) {
+            shapes.add(new Cylinder(point(5, -0.475, z), 0.5, 2, background(1, 0.1, 1)));
+            shapes.add(new Cylinder(point(-5, -0.475, z), 0.5, 2, background(1, 0.1, 1)));
+            shapes.add(new Cylinder(point(5, -0.5, z), 0.55, 2.05, transparent(0.3, 0.3, 0.3)));
+            shapes.add(new Cylinder(point(-5, -0.5, z), 0.55, 2.05, transparent(0.3, 0.3, 0.3)));
+            z -= 10;
+        }
+
         Group scene = new Group(shapes);
-        createImage(scene, "doc/a07-scene.png");
+        createImage(identity, scene, "a07-1.png");
+        createImage(transformation, scene, "a07-2.png");
     }
 
-    private static void createImage(Group scene, String filename) {
+    public static void createImage(Matrix matrix, Group scene, String filename) {
+        Camera camera = new Camera(Math.PI / 3, 1280, 720, matrix);
+        createImage(camera, scene, filename);
+    }
+
+    public static void createImage(Camera camera, Group scene, String filename) {
+        System.out.println("Creating image '" + filename + "'...");
+        long start = System.nanoTime();
         Image image = new Image();
         Raytracer raytracer = new Raytracer(scene, camera, image);
         raytracer.raytrace();
         image.write(Image.getFilepath(filename));
+        long end = System.nanoTime();
+        System.out.println("Completed in " + Math.round((end - start) / 1.0e9) + " seconds.");
     }
 
-    private static Sphere sphere(double x, double y, double radius, Material material) {
-        Ray ray = camera.generateRay(x, y);
+    public static Sphere sphere(Matrix matrix, double x, double y, double radius, Material material) {
+        Camera cam = new Camera(Math.PI / 3, 1280, 720, matrix);
+        Ray ray = cam.generateRay(x, y);
         Hit hit = ground.intersect(ray);
         Point center = point(hit.position().x(), -0.5 + radius, hit.position().z());
         return new Sphere(center, radius, material);
     }
 
-    private static Cylinder cylinder(double x, double y, double radius, double height, Material material) {
-        Ray ray = camera.generateRay(x, y);
+    public static Cylinder cylinder(Matrix matrix, double x, double y, double radius, double height, Material material) {
+        Camera cam = new Camera(Math.PI / 3, 1280, 720, matrix);
+        Ray ray = cam.generateRay(x, y);
         Hit hit = ground.intersect(ray);
-        Point center = point(hit.position().x(), -0.5 + 2 * radius + height, hit.position().z());
-        return new Cylinder(center, radius, height, material);
+        return new Cylinder(hit.position(), radius, height, material);
     }
-    
 
-    private static Material diffuse(double r, double g, double b) {
+    public static Material background(double r, double g, double b) {
+        return new BackgroundMaterial(new Color(r, g, b));
+    }
+
+    public static Material diffuse(double r, double g, double b) {
         return new DiffuseMaterial(new Color(r, g, b));
     }
 
-    private static Material reflective(double diffusionFactor) {
-        return new ReflectiveMaterial(new Color(0.9, 0.9, 0.9), diffusionFactor);
+    public static Material reflective(double r, double g, double b, double diffusionFactor) {
+        return new ReflectiveMaterial(new Color(r, g, b), diffusionFactor);
     }
 
-    private static Material transparent(double r, double g, double b) {
+    public static Material transparent(double r, double g, double b) {
         return new TransparentMaterial(new Color(r, g, b), 1, 1.5);
     }
 }
