@@ -7,7 +7,7 @@ import cgg.a04.Plane;
 import cgg.a04.Shape;
 import cgg.a05.BackgroundMaterial;
 import cgg.a05.DiffuseMaterial;
-import cgg.a08.BoundingBox;
+// import cgg.a08.BoundingBox;
 import cgtools.Color;
 import cgtools.Matrix;
 
