@@ -39,4 +39,16 @@ public class Ray {
     public boolean isValid(double t) {
         return t >= tmin && t <= tmax;
     }
+
+    public double getTmin() {
+        return 0;
+    }
+
+    public Point getDirection() {
+        return null;
+    }
+
+    public Point getOrigin() {
+        return null;
+    }
 }
