@@ -32,4 +32,12 @@ public record Hit(double t, Point position, Direction normal, Material material,
         Direction normal = Matrix.multiply(normalMatrix, this.normal);
         return new Hit(this.t, position, normal, this.material, this.u, this.v);
     }
+
+    public Direction getNormVec() {
+        return null;
+    }
+
+    public Point getHitPoint() {
+        return null;
+    }
 }

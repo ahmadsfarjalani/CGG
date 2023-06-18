@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
+import cgg.a01.PolkaDots;
+
 public class ImageTexture implements Sampler {
   private BufferedImage image;
   public final int width;
@@ -41,7 +43,12 @@ public class ImageTexture implements Sampler {
     }
   }
 
-  @Override
+  
+
+
+
+
+@Override
   public int width() {
     return width;
   }
