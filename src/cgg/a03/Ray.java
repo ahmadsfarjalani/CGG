@@ -51,4 +51,8 @@ public class Ray {
     public Point getOrigin() {
         return null;
     }
+
+    public Direction d() {
+        return null;
+    }
 }

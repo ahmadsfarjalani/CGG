@@ -40,4 +40,12 @@ public record Hit(double t, Point position, Direction normal, Material material,
     public Point getHitPoint() {
         return null;
     }
+
+    public Point x() {
+        return null;
+    }
+
+    public Direction n() {
+        return null;
+    }
 }
