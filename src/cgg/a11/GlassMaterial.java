@@ -15,6 +15,9 @@ public class GlassMaterial implements Material {
         this.roughness = roughness;
     }
 
+    public GlassMaterial(ConstantColor constantColor) {
+    }
+
     public Ray scatteredRay(Ray ray, Hit hit) {
         Direction normVector = hit.getNormVec();
 

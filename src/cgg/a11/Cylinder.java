@@ -17,6 +17,9 @@ public class Cylinder implements Shape{
         this.material = material;
     }
 
+    public Cylinder(Point point, int i, int height2, GlassMaterial material2) {
+    }
+
     public Hit intersect(Ray r) {
 
         Point originShifted = Vector.subtract(r.getOrigin(), Vector.direction(center.x(), center.y(), center.z()));

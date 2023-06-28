@@ -44,7 +44,7 @@ public class Image {
 
 
 
-    public void sample(int sampleRate, Group group, CameraObscura camera, RayTracing raytracer, int recursionDepth, int threadCount) throws InterruptedException, ExecutionException {
+    public void sample(int sampleRate, Group group,CameraObscura camera, RayTracing raytracer, int recursionDepth, int threadCount) throws InterruptedException, ExecutionException {
         Color backgroundColor = new Color(0.5f, 0.7f, 0.9f);
 
         // Thread-Pool erstellen
