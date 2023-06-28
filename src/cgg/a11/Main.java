@@ -7,8 +7,8 @@ import cgtools.*;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException, ExecutionException {
-        final int width = 480;
-        final int height = 270;
+        final int width = 1080 ;
+        final int height = 720;
 
         Group scene = new Group(new Transformation(Matrix.identity));
         
@@ -40,7 +40,7 @@ public class Main {
 
         // Create new camera and sample pictured shapes
         Image shapes = new Image(width, height);
-        shapes.sample(200, scene, camera, new RayTracing(camera, world, 5), 50, 8);
+        shapes.sample(150, scene, camera, new RayTracing(camera, world, 5), 50, 8);
 
         // Write the images to disk
         final String filename = "doc/a11.png";
