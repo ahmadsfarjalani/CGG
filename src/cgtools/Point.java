@@ -3,6 +3,9 @@ package cgtools;
 
 import static cgtools.Vector.*;
 
+// See
+// https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Record.html
+// for details on the record data type.
 public record Point(double x, double y, double z) {
 
   @Override
@@ -19,5 +22,4 @@ public record Point(double x, double y, double z) {
     Point v = (Point) o;
     return Util.isZero(length(subtract(this, v)));
   }
-  
 }

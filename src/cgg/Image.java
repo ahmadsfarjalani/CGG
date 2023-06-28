@@ -1,12 +1,14 @@
-/**
- * @author henrik.tramberend@beuth-hochschule.de
- */
+/** @author henrik.tramberend@beuth-hochschule.de */
 package cgg;
 
-import cgg.a07.OnePixel;
-import cgg.a07.Pixel;
 import cgtools.*;
+import cgg.a11.CameraObscura;
+import cgg.a11.Ray;
+import cgg.a11.Group;
+import cgg.a11.RayTracing;
+import cgg.a11.*;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -14,77 +16,109 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+
+
+
+
 public class Image {
+    double[] comp;
+    int width;
+    int height;
 
-    public static final int samplePoints = 300;
-    public static final int width = 1280;
-    public static final int height = 720;
+    public Image(int width, int height) {
 
-    private final int components = 3;
-    private double[] data;
+        this.width = width;
+        this.height = height;
+        this.comp = new double[width * height * 3];
 
-    public Image() {
-        this.data = new double[width * height * components];
     }
 
     public void setPixel(int x, int y, Color color) {
-        int indexRed = components * (y * width + x);
-        int indexGreen = indexRed + 1;
-        int indexBlue = indexRed + 2;
+        int i = 3 * (y * width + x);
+        double gamma = 2.2;
+        comp[i + 0] = Math.pow(color.r(), 1/gamma);
+        comp[i + 1] = Math.pow(color.g(), 1/gamma);
+        comp[i + 2] = Math.pow(color.b(), 1/gamma);
 
-        color = correctGamma(color);
-
-        data[indexRed] = color.r();
-        data[indexGreen] = color.g();
-        data[indexBlue] = color.b();
     }
 
-    private Color correctGamma(Color color) {
-        final double gamma = 2.2;
-        double r = Math.pow(color.r(), 1 / gamma);
-        double g = Math.pow(color.g(), 1 / gamma);
-        double b = Math.pow(color.b(), 1 / gamma);
-        return new Color(r, g, b);
-    }
 
-    public void write(String filename) {
-        ImageWriter.write(filename, data, width, height);
-    }
 
-    public void sample(Sampler s) {
-        int threads = Runtime.getRuntime().availableProcessors();
-        ExecutorService pool = Executors.newFixedThreadPool(threads);
-        List<Future<Pixel>> pixels = new ArrayList<>();
-        // Iterates over all pixel positions inside this image.
-        for (int x = 0; x != width; x++) {
-            for (int y = 0; y != height; y++) {
-                pixels.add(pool.submit(new OnePixel(s, x, y)));
-            }
-        }
-        int i = 0;
-        for (Future<Pixel> future : pixels) {
-            try {
-                Pixel pixel = future.get();
-                // Sets the color for one particular pixel.
-                this.setPixel(pixel.x(), pixel.y(), pixel.color());
-                if (pixel.x() % (width / 20) == 0 && pixel.y() == 0) {
-                    System.out.print(i + "%... ");
-                    i += 5;
+    public void sample(int sampleRate, Group group, CameraObscura camera, RayTracing raytracer, int recursionDepth, int threadCount) throws InterruptedException, ExecutionException {
+        Color backgroundColor = new Color(0.5f, 0.7f, 0.9f);
+
+        // Thread-Pool erstellen
+        ExecutorService pool = Executors.newFixedThreadPool(threadCount);
+
+        // Fortschritt in Thread-sichere Variable auslagern
+        AtomicInteger progressCounter = new AtomicInteger();
+
+        // Batching der Pixel-Reihen in größere Aufgaben
+        int batchSize = Math.max(height / threadCount, 1);
+
+        List<Future<Void>> futures = new ArrayList<>();
+
+        for (int xPosition = 0; xPosition < width; xPosition++) {
+            final int x = xPosition;
+
+            // Gruppe von Pixel-Reihen als Aufgabe einreichen
+            Future<Void> future = pool.submit(() -> {
+                for (int batchStart = 0; batchStart < height; batchStart += batchSize) {
+                    int batchEnd = Math.min(batchStart + batchSize, height);
+                    for (int yPosition = batchStart; yPosition < batchEnd; yPosition++) {
+                        final int y = yPosition;
+                        Color accumulatedColor = new Color(0, 0, 0);
+                        for (int sampleIndex = 0; sampleIndex < sampleRate; sampleIndex++) {
+                            Ray ray = camera.generateRay(x, y);
+                            Hit nearestHit = group.intersect(ray);
+                            Color currentPixelColor;
+                            if (nearestHit != null) {
+                                currentPixelColor = raytracer.calculateRadiance(group, ray, recursionDepth);
+                            } else {
+                                currentPixelColor = backgroundColor;
+                            }
+                            accumulatedColor = Vector.add(accumulatedColor, currentPixelColor);
+                        }
+                        Color finalColor = Vector.divide(accumulatedColor, sampleRate);
+                        setPixel(x, y, finalColor);
+                    }
                 }
-            } catch (InterruptedException | ExecutionException | NullPointerException e) {
+
+                // Fortschritt anzeigen
+                int progress = progressCounter.incrementAndGet();
+                System.out.printf("Rendering progress: %.2f%%\n", (double) progress / width * 100);
+
+                return null;
+            });
+
+            futures.add(future);
+        }
+
+        // Warten, bis alle Aufgaben abgeschlossen sind
+        for (Future<Void> future : futures) {
+            try {
+                future.get();
+            } catch (ExecutionException e) {
                 e.printStackTrace();
             }
         }
+
         pool.shutdown();
     }
 
-    private void notYetImplemented() {
-        System.err.println("Please complete the implementation of class cgg.Image as part of assignment 1.");
-        System.exit(1);
+
+
+
+
+
+
+
+
+
+    public void write(String filename) {
+        // Use cggtools.ImageWriter.write() to implement this.
+
+        ImageWriter.write(filename, comp, width, height);;
     }
 
-    public static String getFilepath(String filename) {
-        String projectDir = System.getProperty("user.dir");
-        return projectDir + "/doc/" + filename;
-    }
 }

@@ -44,7 +44,7 @@ public class Main {
         shapes.add(sphere(980, 550, 0.3, diffuse(0.4, 0.8, 0.6))); // Pastell-Grün
         shapes.add(sphere(130, 600, 0.2, diffuse(0.8, 0.8, 0.2))); // Pastell-Gelb
         shapes.add(sphere(1150, 600, 0.2, transparent(1, 0.9, 0.6))); // Transparent
-
+        shapes.add(spehre(1150, 600 , 0,2, transparent (1 , 0.4 , 0.6 )));
         Group scene = new Group(shapes);
         createImage(scene, "a10.png");
     }
@@ -61,6 +61,7 @@ public class Main {
         Hit hit = ground.intersect(ray);
         Point center = point(hit.position().x(), -0.5 + radius, hit.position().z());
         return new Sphere(center, radius, material);
+        
     }
 
     private static Material diffuse(double r, double g, double b) {

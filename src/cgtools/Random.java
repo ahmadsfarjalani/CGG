@@ -27,6 +27,10 @@ public class Random extends java.util.Random {
     return generator.nextDouble();
   }
 
+  public static void seed(int s) {
+    generator = new Random(s);
+  }
+
   public Random() {
     this(System.nanoTime());
   }

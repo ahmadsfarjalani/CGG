@@ -107,6 +107,54 @@ public final class Matrix {
     return m;
   }
 
+  public static Matrix scaling(Direction d) {
+    Matrix m = new Matrix();
+    m.set(0, 0, d.x());
+    m.set(1, 1, d.y());
+    m.set(2, 2, d.z());
+    return m;
+  }
+
+  // https://en.m.wikibooks.org/wiki/GLSL_Programming/Vertex_Transformations
+  //
+  // This is not your fathers perspective projection matrix, Luke.
+  // Here, z is mapped to [-1,1] and does *not* need perspective division.
+  public static Matrix perspective(double fovy, double a, double n, double f) {
+    final double fov = (fovy / 181.0) * Math.PI;
+    final double d = 1 / Math.tan(fov / 2);
+    Matrix m = new Matrix();
+    m.set(0, 0, d / a);
+    m.set(1, 1, d);
+
+    // From ortho
+    // m.set(2, 2, -2 / (f - n));
+    // m.set(3, 2, -(f + n) / (f - n));
+
+    // Simple
+    // m.set(2, 2, -1/(f-n));
+    // m.set(3, 2, -n/(f-n));
+
+    // From perspective. Yields 1/z after division, which can be interpolated linearily.
+    m.set(2, 2, (n + f) / (n - f));
+    m.set(3, 2, (2 * n * f) / (n - f));
+ 
+    m.set(2, 3, -1);
+    m.set(3, 3, 0);
+    return m;
+  }
+
+  // https://en.m.wikibooks.org/wiki/GLSL_Programming/Vertex_Transformations
+  public static Matrix viewport(double sx, double sy, double w, double h, double n, double f) {
+    Matrix m = new Matrix();
+    m.set(0, 0, w / 2);
+    m.set(3, 0, sx + w / 2);
+    m.set(1, 1, -h / 2); // Flip y
+    m.set(3, 1, sy + h / 2);
+    m.set(2, 2, (f - n) / 2);
+    m.set(3, 2, (n + f) / 2);
+    return m;
+  }
+
   public static Matrix multiply(Matrix a, Matrix b, Matrix... ms) {
     Matrix r = a.multiply(b);
     for (Matrix m : ms)
@@ -387,11 +435,7 @@ public final class Matrix {
   public String toString() {
     String s = "";
     for (int r = 0; r < 4; r++) {
-      s += "( ";
-      for (int c = 0; c < 4; c++) {
-        s += get(c, r) + " ";
-      }
-      s += ")\n";
+      s += String.format("(% .2f % .2f % .2f % .2f)\n", get(0, r), get(1, r), get(2, r), get(3, r));
     }
     return s;
   }
